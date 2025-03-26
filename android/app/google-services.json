@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "242223414952",
+    "project_id": "watchparty-f57d3",
+    "storage_bucket": "watchparty-f57d3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242223414952:android:ba10613680dcbf64eecc9d",
+        "android_client_info": {
+          "package_name": "com.example.videoandconfigsharing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd-InCO7-q3xdwF8wQh9jZr_do_5hcq4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

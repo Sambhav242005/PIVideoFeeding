@@ -1,3 +1,7 @@
+if (MSVC)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ignore:4099")
+endif()
+
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
 project(videoandconfigsharing LANGUAGES CXX)

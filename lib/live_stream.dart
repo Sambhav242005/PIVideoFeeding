@@ -1,15 +1,14 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:collection';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class VideoStreamApp extends StatefulWidget {
   final String serverIp;
-  const VideoStreamApp({Key? key, required this.serverIp}) : super(key: key);
+  const VideoStreamApp({super.key, required this.serverIp});
 
   @override
   _VideoStreamAppState createState() => _VideoStreamAppState();
@@ -20,6 +19,10 @@ class _VideoStreamAppState extends State<VideoStreamApp> {
   Uint8List? imageBytes;
   bool isProcessing = false;
   Queue<Uint8List> frameQueue = Queue<Uint8List>();
+
+  // Variables to control frame upload frequency
+  DateTime? lastUploadTime;
+  int frameCounter = 0;
 
   @override
   void initState() {
@@ -41,10 +44,14 @@ class _VideoStreamAppState extends State<VideoStreamApp> {
           frameQueue.add(frame);
         }
       } catch (e) {
-        print("Error decoding frame: $e");
+        if (kDebugMode) {
+          print("Error decoding frame: $e");
+        }
       }
     }, onError: (error) {
-      print("WebSocket error: $error");
+      if (kDebugMode) {
+        print("WebSocket error: $error");
+      }
     });
   }
 
@@ -54,11 +61,20 @@ class _VideoStreamAppState extends State<VideoStreamApp> {
         isProcessing = true;
         Uint8List frame = frameQueue.removeFirst();
 
+        // Process the frame asynchronously (if any processing is needed)
         Uint8List optimizedFrame = await compute(_processImage, frame);
 
         setState(() {
           imageBytes = optimizedFrame;
         });
+
+        // Upload one frame per second
+        if (lastUploadTime == null ||
+            DateTime.now().difference(lastUploadTime!) > Duration(seconds: 1)) {
+          frameCounter++;
+          await _uploadFrame(optimizedFrame, frameCounter);
+          lastUploadTime = DateTime.now();
+        }
 
         isProcessing = false;
       }
@@ -67,8 +83,27 @@ class _VideoStreamAppState extends State<VideoStreamApp> {
     }
   }
 
+  // A placeholder for any image processing logic
   static Uint8List _processImage(Uint8List frame) {
-    return frame; // No processing now, but can add enhancements later
+    return frame;
+  }
+
+  /// Uploads a frame to Supabase Storage under the bucket "video_frames".
+  Future<void> _uploadFrame(Uint8List frame, int frameNumber) async {
+    final supabase = Supabase.instance.client;
+    final fileName = 'frames/frame_$frameNumber.png';
+
+    try {
+      // Upload the binary frame. The method returns the file path on success.
+      final filePath = await supabase.storage.from('videoframes').uploadBinary(fileName, frame);
+      if (kDebugMode) {
+        print("Uploaded frame: $filePath");
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print("Error uploading frame: $error");
+      }
+    }
   }
 
   @override
