@@ -21,6 +21,11 @@ dependencies:
   uuid: ^4.1.0
   livekit_client: ^2.3.6  # ✅ Removed duplicate & kept latest
   process_run: ^0.14.2  # ✅ Updated to latest stable
+  latlong2: ^0.9.1
+  flutter_map: ^8.1.1
+  geolocator: ^13.0.4
+  permission_handler: ^11.4.0
+  flutter_sound: ^9.28.0
   
 
 

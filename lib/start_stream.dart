@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:uuid/uuid.dart';
-import 'live_stream.dart';
+import 'package:videoandconfigsharing/mic_button.dart';
+import 'live_stream.dart';  
+import 'map_section.dart';  // ✅ Import the map widget
 
 // Global variable to store streamer token
 String _streamerToken = "";
@@ -24,7 +25,7 @@ class _StartStreamPageState extends State<StartStreamPage> {
   @override
   void initState() {
     super.initState();
-    _fetchLastIp();
+    _fetchLastIp();  
   }
 
   Future<void> _fetchLastIp() async {
@@ -64,16 +65,11 @@ class _StartStreamPageState extends State<StartStreamPage> {
         final String streamerToken = output['streamer_token'];
         final String viewerToken = output['viewer_token'];
 
-        // Save the streamer token globally
         _streamerToken = streamerToken;
 
-        // Delete all previous tokens
         await supabase.from('livekit_tokens').delete().not('id', 'is', null);
-
-        // Generate a new UUID
         final uuid = Uuid().v4();
 
-        // Insert new tokens
         await supabase.from('livekit_tokens').insert({
           'id': uuid,
           'streamer_token': streamerToken,
@@ -92,7 +88,7 @@ class _StartStreamPageState extends State<StartStreamPage> {
             MaterialPageRoute(
               builder: (context) => VideoStreamApp(
                 serverIp: ip,
-                liveKitToken: _streamerToken, // Pass the token
+                liveKitToken: _streamerToken,
               ),
             ),
           );
@@ -129,6 +125,10 @@ class _StartStreamPageState extends State<StartStreamPage> {
                   ? const CircularProgressIndicator()
                   : const Text("Generate Token & Start Stream"),
             ),
+            const SizedBox(height: 20),
+            Text("📍 Live Map", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            OsmMapViewer(),  // ✅ Add the map viewer here
+            MicButton()
           ],
         ),
       ),
